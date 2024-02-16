@@ -5,23 +5,38 @@ import { createPostApi } from "../../APIServices/post/postApi";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useState } from "react";
+import { FaTimesCircle } from "react-icons/fa";
 
 
 function CreatePost() {
 // state for WYSIWYG
 const [description, setDescription]=useState<string>("");
-console.log("this is description", description)
+
   const postMutate = useMutation({
     mutationKey:["createPost"],
     mutationFn:createPostApi
   });
-const {error, isPending, isError,isSuccess} = postMutate
+const {error, isPending, isError,isSuccess,data} = postMutate
   // console.log("Mutation: ", error?.message, isPending, isError,isSuccess)
-    const formik = useFormik({
+
+  console.log("this is the errorMessage",error, "data", data)
+
+  //  set display image state
+
+  const [imagePreview, setImagePreview] = useState<string>("")
+  
+  // set image error state
+  
+  const [imageError, setImageError]= useState<string | null>(null)
+
+
+ 
+  const formik = useFormik({
 
         // initial data
         initialValues: {
-        description:""
+        description:"",
+        image:""
         },
 
         // validation
@@ -29,41 +44,49 @@ const {error, isPending, isError,isSuccess} = postMutate
         // form submit handler
         onSubmit: (values) => {
             // Handle form submission, e.g., API call or further processing
-            console.log("submit ran")
-            postMutate.mutate(values)
+            console.log("submit ran", values)
+            const formData = new FormData()
+            formData.append("description", values.description)
+            formData.append("postImage", values.image)
+            
+          
+             postMutate.mutate(formData)
           },
      
     })
     const {errors,touched} = formik
-  console.log("this is the error message",errors)
-  return (
-    // <div>
-    //   {
-    //     isPending && <p>Loading...</p>
-    //   }
-    //    {
-       
-    //     isSuccess && <p>Post Created Successfull</p>
-    //   }
-    
-    //    {
-       
-    //     isError && <p>{error?.response?.data?.message}</p>
-    //   }
-    //     <form onSubmit={formik.handleSubmit}>
-    //        <ReactQuill
-    //        value={formik.values.description}
-    //        onChange={(value) => {
-           
-    //         setDescription(value.trim());
-    //            formik.setFieldValue("description", value.trim());
-    //        }}
-    //        />
-    //       { touched.description && errors.description &&   <p className="bg-red-400">{errors.description}</p>}
 
-    //         <button type="submit">Create Post</button>
-    //     </form>
-    // </div>
+    // handle file upload
+
+    const handleFileChange = (e) => {
+  const file = e.currentTarget.files[0]
+  console.log(file)
+
+// ensure the size of the image does not exceed 1MB
+if(file.size > 1048576){
+  setImageError("file size exceeds 1MB")
+  return
+}
+if(!["image/png", "image/jpeg", "image/jpg"].includes(file.type)){
+  setImageError("Image format not supported")
+  return
+}
+setImageError("")
+ formik.setFieldValue("image", file)
+ setImagePreview(URL.createObjectURL(file))
+
+    }
+
+    // removeImage function
+
+    const removeImage = () => {
+      setImagePreview("")
+     formik.setFieldValue("image", "")
+    }
+
+
+  return (
+   
     <div className="flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 m-4">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
@@ -94,17 +117,55 @@ const {error, isPending, isError,isSuccess} = postMutate
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-center bg-gray-50 p-4 shadow rounded-lg">
+           {/* Image Upload Input - File input for uploading images */}
+           <div className="flex flex-col items-center justify-center bg-gray-50 p-4 shadow rounded-lg">
             <label
               htmlFor="images"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Upload Image
             </label>
-          
-         
+            <div className="flex justify-center items-center w-full">
+              <input
+                 id="images"
+                type="file"
+                name="postImage"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <label
+                htmlFor="images"
+                className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+              >
+                Choose a file
+              </label>
+            </div>
+            {/* Display error message */}
+            {formik.touched.image && formik.errors.image && (
+              <p className="text-sm text-red-600">{formik.errors.image}</p>
+            )}
 
-        
+            {/* error message */}
+            {imageError && <p className="text-sm text-red-600">{imageError}</p>}
+
+            {/* Preview image */}
+
+            {imagePreview && (
+              <div className="mt-2 relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-2 h-24 w-24 object-cover rounded-full"
+                />
+                <button
+                   onClick={removeImage}
+                  className="absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-1"
+                >
+                  <FaTimesCircle className="text-red-500" />
+                </button>
+              </div>
+            )} 
           </div>
 
           {/* Submit Button - Button to submit the form */}

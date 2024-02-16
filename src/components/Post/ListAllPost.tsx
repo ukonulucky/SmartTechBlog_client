@@ -26,6 +26,8 @@ const handlePostDeleteFunc = async(postId) =>{
 }
 
 
+console.log("post list", data)
+
   return (
   
     <section className="overflow-hidden ">
@@ -90,8 +92,8 @@ const handlePostDeleteFunc = async(postId) =>{
                   <div className="absolute bottom-0 right-0 z-10"></div>
                   <img
                     className="absolute inset-0 w-full h-full object-cover rounded-2xl"
-                    src={"https://cdn.pixabay.com/photo/2015/12/01/20/28/road-1072823_1280.jpg"}
-                    alt={post?._id}
+                    src={post?.img?.path ? post.img.path : "https://cdn.pixabay.com/photo/2015/12/01/20/28/road-1072823_1280.jpg"}
+                    alt={post?.img?.fieldname}
                   />
                 </div>
                 <div className="pt-6 pb-3 px-4">
