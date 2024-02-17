@@ -22,7 +22,7 @@ const PostsList = () => {
     queryFn: () =>
       fetchAllPosts({ ...filters, title: searchTerm, page, limit: 6 }),
   });
-  console.log(data);
+
   //category filter handler
   const handleCategoryFilter = (categoryId) => {
     setFilters({ ...filters, category: categoryId });

@@ -1,15 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { loginAPI, registerAPI } from "../../APIServices/users/usersAPI";
 import AlertMessage from "../Alert/AlertMessage";
-import { loginApi } from "../../APIServices/User/UserApi";
+import {  loginApi } from "../../APIServices/User/UserApi";
 import { LoginUserValidationSchema } from "../../utils/YubValidation";
+import { useDispatch } from "react-redux";
+import { loginAction } from "../../redux/slices/authSlice";
+
+
+// authGoogleLoginApi 
+
+
 
 const Login = () => {
   //navigate
+ 
 
   // user mutation
 const userMutation = useMutation({
@@ -18,18 +26,28 @@ const userMutation = useMutation({
 }) 
 
 
-const { isSuccess, isError, isPending, error  } = userMutation
-  // formik config
+const navigate = useNavigate()
+const { isSuccess, isError, isPending, error, data  } = userMutation
 
+
+  // formik config
+ const dispatch = useDispatch()
   const formik = useFormik({
     initialValues: {
-      userName:"",
-      password:""
+      userName:"sam993",
+      password:"test1234"
     },
     validationSchema:LoginUserValidationSchema,
-    onSubmit:(values) => {
-console.log(values)
-userMutation.mutate(values)
+    onSubmit: async(values) => {
+try{
+ 
+  await userMutation.mutateAsync(values)
+  console.log("data obtainded", data)
+  dispatch(loginAction(data))
+  navigate("/")
+}catch(e){
+console.log(e)
+}
     }
   })
 

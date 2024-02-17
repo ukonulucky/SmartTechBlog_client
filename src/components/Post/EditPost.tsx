@@ -63,7 +63,7 @@ const {data:updateMutationData, error:updateMutationError, isPending: updateMuta
 
 
  const { errors, touched} = formik
- console.log("this is the result", data)
+
 
 
   return (
